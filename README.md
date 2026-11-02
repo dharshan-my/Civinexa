@@ -327,4 +327,5 @@ Follow this 5-minute walkthrough during your project demonstration:
 - **Degree Course**: Bachelor of Computer Applications (BCA) - Final Year Capstone Project
 - **Architecture**: Modular Full-Stack Web Application (Flask, SQLite, NLP Classifier, Leaflet.js, Bootstrap 5)
 #   C i v i n e x a  
+ #   C i v i n e x a  
  
