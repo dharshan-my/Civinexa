@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Complaint Management - CiviNexa AI Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+
+  <!-- Header & Breadcrumbs -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <a href="{{ url_for('admin_dashboard') }}" class="text-decoration-none small text-muted">
+          <i class="bi bi-speedometer2 me-1"></i>Dashboard
+        </a>
+        <span class="text-muted small">/</span>
+        <span class="small fw-semibold text-primary">Complaints Management</span>
+      </div>
+      <h2 class="fw-bold text-dark mb-0">Municipal Complaints Directory</h2>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-speedometer2 me-1"></i>Analytics Dashboard
+      </a>
+      <a href="{{ url_for('report') }}" class="btn btn-brand">
+        <i class="bi bi-plus-circle me-1"></i>Log Manual Entry
+      </a>
+    </div>
+  </div>
+
+  <!-- Search & Filter Controls Card -->
+  <div class="card-modern p-3 px-4 mb-4 bg-white">
+    <form action="{{ url_for('complaints') }}" method="GET" class="row g-3 align-items-end">
+      
+      <!-- Text Search -->
+      <div class="col-md-4">
+        <label class="form-label small fw-semibold">Search Complaints</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" name="search" id="adminTableSearch" class="form-control" 
+                 placeholder="Search ID, title, citizen or location..." value="{{ search_query }}">
+        </div>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Filter by Status</label>
+        <select name="status" id="adminStatusFilter" class="form-select" onchange="this.form.submit()">
+          <option value="All" {% if current_status == 'All' %}selected{% endif %}>All Statuses</option>
+          <option value="Submitted" {% if current_status == 'Submitted' %}selected{% endif %}>Submitted</option>
+          <option value="Under Review" {% if current_status == 'Under Review' %}selected{% endif %}>Under Review</option>
+          <option value="In Progress" {% if current_status == 'In Progress' %}selected{% endif %}>In Progress</option>
+          <option value="Resolved" {% if current_status == 'Resolved' %}selected{% endif %}>Resolved</option>
+          <option value="Rejected" {% if current_status == 'Rejected' %}selected{% endif %}>Rejected</option>
+        </select>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="col-md-3">
+        <label class="form-label small fw-semibold">Filter by Category</label>
+        <select name="category" id="adminCategoryFilter" class="form-select" onchange="this.form.submit()">
+          <option value="All" {% if current_category == 'All' %}selected{% endif %}>All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat }}" {% if current_category == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Actions -->
+      <div class="col-md-2 d-flex gap-2">
+        <button type="submit" class="btn btn-primary w-100">
+          <i class="bi bi-funnel me-1"></i>Filter
+        </button>
+        <a href="{{ url_for('complaints') }}" class="btn btn-light border" title="Reset Filters">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Complaints Management Table Card -->
+  <div class="card-modern">
+    <div class="p-3 px-4 border-bottom d-flex justify-content-between align-items-center bg-light">
+      <div class="fw-bold text-dark">
+        <i class="bi bi-table me-2 text-primary"></i>All Recorded Civic Complaints
+      </div>
+      <span class="badge bg-secondary">{{ complaints|length }} Records Displayed</span>
+    </div>
+
+    {% if complaints %}
+      <div class="table-responsive">
+        <table class="table-civic align-middle" id="adminComplaintsTable">
+          <thead>
+            <tr>
+              <th>Tracking ID</th>
+              <th>Citizen Details</th>
+              <th>Issue Title & Department</th>
+              <th>Category</th>
+              <th>Location</th>
+              <th>Current Status</th>
+              <th>Priority</th>
+              <th>Created On</th>
+              <th class="text-end">Manage Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in complaints %}
+              <tr data-status="{{ item.status }}" data-category="{{ item.category }}">
+                
+                <!-- ID -->
+                <td>
+                  <a href="{{ url_for('track', complaint_id=item.complaint_id) }}" class="fw-bold text-primary text-decoration-none">
+                    {{ item.complaint_id }}
+                  </a>
+                  {% if item.image_path %}
+                    <span class="badge bg-light text-info border ms-1" title="Photo Attached"><i class="bi bi-camera"></i></span>
+                  {% endif %}
+                </td>
+
+                <!-- Citizen -->
+                <td>
+                  <div class="fw-semibold text-dark">{{ item.citizen_name if item.citizen_name else 'Guest / Anonymous' }}</div>
+                  <div class="small text-muted" style="font-size: 0.75rem;">{{ item.citizen_email if item.citizen_email else 'No email' }}</div>
+                </td>
+
+                <!-- Title & Dept -->
+                <td>
+                  <div class="fw-semibold text-dark text-truncate" style="max-width: 260px;" title="{{ item.complaint_title }}">
+                    {{ item.complaint_title }}
+                  </div>
+                  <div class="text-muted small text-truncate" style="max-width: 260px; font-size: 0.75rem;">
+                    <i class="bi bi-building me-1"></i>{{ item.suggested_department }}
+                  </div>
+                </td>
+
+                <!-- Category -->
+                <td>
+                  <span class="badge bg-light text-dark border">{{ item.category }}</span>
+                </td>
+
+                <!-- Location -->
+                <td>
+                  <div class="small text-truncate" style="max-width: 180px;" title="{{ item.location }}">
+                    <i class="bi bi-geo-alt text-danger me-1"></i>{{ item.location }}
+                  </div>
+                </td>
+
+                <!-- Status -->
+                <td>
+                  {% if item.status == 'Submitted' %}
+                    <span class="badge badge-status-submitted">{{ item.status }}</span>
+                  {% elif item.status == 'Under Review' %}
+                    <span class="badge badge-status-under-review">{{ item.status }}</span>
+                  {% elif item.status == 'In Progress' %}
+                    <span class="badge badge-status-in-progress">{{ item.status }}</span>
+                  {% elif item.status == 'Resolved' %}
+                    <span class="badge badge-status-resolved">{{ item.status }}</span>
+                  {% else %}
+                    <span class="badge badge-status-rejected">{{ item.status }}</span>
+                  {% endif %}
+                </td>
+
+                <!-- Priority -->
+                <td>
+                  {% if item.priority == 'Urgent' %}
+                    <span class="badge badge-priority-urgent">Urgent</span>
+                  {% elif item.priority == 'High' %}
+                    <span class="badge badge-priority-high">High</span>
+                  {% elif item.priority == 'Medium' %}
+                    <span class="badge badge-priority-medium">Medium</span>
+                  {% else %}
+                    <span class="badge badge-priority-low">Low</span>
+                  {% endif %}
+                </td>
+
+                <!-- Created Date -->
+                <td class="small text-muted text-nowrap">
+                  {{ item.created_date[:10] }}
+                </td>
+
+                <!-- Actions -->
+                <td class="text-end text-nowrap">
+                  <!-- Update Status Trigger -->
+                  <button type="button" class="btn btn-sm btn-primary me-1" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#statusModal"
+                          data-complaint-id="{{ item.complaint_id }}"
+                          data-current-status="{{ item.status }}"
+                          title="Change Status & Remarks">
+                    <i class="bi bi-pencil-square me-1"></i>Update
+                  </button>
+
+                  <!-- Quick Public Track View -->
+                  <a href="{{ url_for('track', complaint_id=item.complaint_id) }}" class="btn btn-sm btn-light border" title="View Full Timeline">
+                    <i class="bi bi-clock-history"></i>
+                  </a>
+                </td>
+
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-5 text-center">
+        <div class="stat-icon icon-blue mx-auto mb-3">
+          <i class="bi bi-funnel"></i>
+        </div>
+        <h5 class="fw-bold text-dark">No Complaints Match Filters</h5>
+        <p class="text-secondary small">Try clearing search filters to see all municipal grievances.</p>
+        <a href="{{ url_for('complaints') }}" class="btn btn-outline-primary btn-sm">Reset All Filters</a>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- Modal: Update Complaint Status & Admin Remarks -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <form id="updateStatusForm" method="POST" action="">
+        <div class="modal-header border-bottom">
+          <h5 class="modal-title fw-bold" id="statusModalLabel">
+            <i class="bi bi-arrow-repeat text-primary me-2"></i>Update Complaint Status
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Complaint Tracking ID</label>
+            <input type="text" id="modalComplaintIdDisplay" class="form-control bg-light fw-bold text-primary" readonly>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-secondary">Select New Status <span class="text-danger">*</span></label>
+            <select name="status" id="modalStatusSelect" class="form-select py-2" required>
+              <option value="Submitted">Submitted (Logged)</option>
+              <option value="Under Review">Under Review (Inspection Assigned)</option>
+              <option value="In Progress">In Progress (Field Work Underway)</option>
+              <option value="Resolved">Resolved (Fixed & Closed)</option>
+              <option value="Rejected">Rejected (Out of Municipal Jurisdiction / Duplicate)</option>
+            </select>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label small fw-semibold text-secondary">Administrator Remarks / Field Notes <span class="text-danger">*</span></label>
+            <textarea name="remarks" id="modalRemarksText" class="form-control" rows="4" 
+                      placeholder="e.g. Dispatched asphalt patching team. Repaired road crater and resurfaced with cold mix." required></textarea>
+            <div class="form-text">These remarks are immediately timestamped and shown on the citizen's tracking timeline.</div>
+          </div>
+
+        </div>
+        <div class="modal-footer border-top bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-brand btn-sm px-4">
+            <i class="bi bi-check2-circle me-1"></i>Save Status Update
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Setup modal dynamic population
+  const statusModal = document.getElementById("statusModal");
+  if (statusModal) {
+    statusModal.addEventListener("show.bs.modal", function (event) {
+      const button = event.relatedTarget;
+      const complaintId = button.getAttribute("data-complaint-id");
+      const currentStatus = button.getAttribute("data-current-status");
+
+      document.getElementById("modalComplaintIdDisplay").value = complaintId;
+      document.getElementById("modalStatusSelect").value = currentStatus;
+      document.getElementById("modalRemarksText").value = "";
+
+      const form = document.getElementById("updateStatusForm");
+      form.action = "/admin/complaint/" + complaintId + "/update-status";
+    });
+  }
+</script>
+{% endblock %}

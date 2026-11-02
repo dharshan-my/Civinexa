@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - CiviNexa AI Civic Governance System{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <!-- Page Header -->
+  <div class="text-center max-w-700 mx-auto mb-5">
+    <span class="badge bg-purple-subtle text-purple fw-bold px-3 py-1 mb-2">About The Platform</span>
+    <h1 class="fw-black text-dark display-5">Empowering Communities Through Smart Civic AI</h1>
+    <p class="lead text-secondary">
+      CiviNexa AI is an intelligent civic problem reporting, classification, and tracking ecosystem engineered to make municipal management responsive, transparent, and data-driven.
+    </p>
+  </div>
+
+  <!-- Vision & Mission Grid -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-6">
+      <div class="card-modern p-4 h-100">
+        <div class="stat-icon icon-blue mb-3">
+          <i class="bi bi-eye-fill"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Our Vision</h4>
+        <p class="text-secondary">
+          To eliminate bureaucratic delays in public grievance redressal by replacing slow paper files and manual triage with real-time AI classification, pinpoint geographic mapping, and open status tracking.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card-modern p-4 h-100">
+        <div class="stat-icon icon-purple mb-3">
+          <i class="bi bi-bullseye"></i>
+        </div>
+        <h4 class="fw-bold mb-2">Our Mission</h4>
+        <p class="text-secondary">
+          To provide every citizen with an effortless, transparent reporting tool that routes civic issues (potholes, garbage, sewage leaks, unlit streets) directly to the right municipal engineers in milliseconds.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- How The AI Engine Works -->
+  <div class="card-modern p-4 p-lg-5 mb-5 border-0 shadow-sm" style="background:#ffffff;">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-6">
+        <span class="badge bg-info-subtle text-info fw-bold px-3 py-1 mb-2">AI Architecture</span>
+        <h3 class="fw-bold text-dark mb-3">Intelligent Natural Language Grievance Triage</h3>
+        <p class="text-secondary">
+          Civic complaints submitted by citizens often contain localized expressions, urgent hazard descriptions, and varied vocabulary. CiviNexa AI incorporates a weighted keyword and semantic classifier module:
+        </p>
+        <ul class="list-unstyled d-flex flex-column gap-2 text-secondary">
+          <li><i class="bi bi-check2-circle text-primary me-2"></i><strong>Text Normalization:</strong> Strips noise, parses words, and handles multi-term phrase matches.</li>
+          <li><i class="bi bi-check2-circle text-primary me-2"></i><strong>Category Scoring:</strong> Matches against domain taxonomies (Roads, Waste, Sewage, Power, Water, Infrastructure).</li>
+          <li><i class="bi bi-check2-circle text-primary me-2"></i><strong>Urgency Detection:</strong> Detects dangerous indicators like live electric wires, open manholes, or major pipe bursts to escalate priority to <em>Urgent</em>.</li>
+          <li><i class="bi bi-check2-circle text-primary me-2"></i><strong>Smart Fallback:</strong> If confidence is below threshold, complaints are safely flagged as <em>"Needs Manual Review"</em>.</li>
+        </ul>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="p-4 rounded-4" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border: 1px solid #dbeafe;">
+          <h6 class="fw-bold text-dark mb-3"><i class="bi bi-diagram-3-fill text-purple me-2"></i>System Architecture Flow</h6>
+          <div class="d-flex flex-column gap-3 small">
+            <div class="p-2 rounded bg-white border d-flex align-items-center gap-2">
+              <span class="badge bg-primary">1</span>
+              <div><strong>Citizen Input:</strong> Form + Leaflet Map Coordinates + Photo</div>
+            </div>
+            <div class="text-center text-muted"><i class="bi bi-arrow-down"></i></div>
+            <div class="p-2 rounded bg-white border d-flex align-items-center gap-2">
+              <span class="badge bg-purple" style="background:#7c3aed;">2</span>
+              <div><strong>classifier.py:</strong> Weighted NLP & Department Recommender</div>
+            </div>
+            <div class="text-center text-muted"><i class="bi bi-arrow-down"></i></div>
+            <div class="p-2 rounded bg-white border d-flex align-items-center gap-2">
+              <span class="badge bg-info text-white">3</span>
+              <div><strong>SQLite Database:</strong> Parameterized storage & Status History</div>
+            </div>
+            <div class="text-center text-muted"><i class="bi bi-arrow-down"></i></div>
+            <div class="p-2 rounded bg-white border d-flex align-items-center gap-2">
+              <span class="badge bg-success">4</span>
+              <div><strong>Admin & Field Resolution:</strong> Timeline status update & Citizen Tracking</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tech Stack Grid -->
+  <div class="mb-5">
+    <div class="text-center mb-4">
+      <h3 class="fw-bold text-dark">Built With Modern Full-Stack Technologies</h3>
+      <p class="text-secondary small">Carefully selected for performance, reliability, and ease of deployment.</p>
+    </div>
+
+    <div class="row g-3 text-center">
+      <div class="col-md-2 col-4">
+        <div class="p-3 border rounded-3 bg-white h-100">
+          <i class="bi bi-filetype-py fs-2 text-primary mb-1 d-block"></i>
+          <div class="fw-bold small">Python 3.12</div>
+          <div class="text-muted" style="font-size:0.75rem;">Core Engine</div>
+        </div>
+      </div>
+      <div class="col-md-2 col-4">
+        <div class="p-3 border rounded-3 bg-white h-100">
+          <i class="bi bi-hdd-network fs-2 text-danger mb-1 d-block"></i>
+          <div class="fw-bold small">Flask 3.x</div>
+          <div class="text-muted" style="font-size:0.75rem;">Web Backend</div>
+        </div>
+      </div>
+      <div class="col-md-2 col-4">
+        <div class="p-3 border rounded-3 bg-white h-100">
+          <i class="bi bi-database-fill fs-2 text-info mb-1 d-block"></i>
+          <div class="fw-bold small">SQLite 3</div>
+          <div class="text-muted" style="font-size:0.75rem;">Relational DB</div>
+        </div>
+      </div>
+      <div class="col-md-2 col-4">
+        <div class="p-3 border rounded-3 bg-white h-100">
+          <i class="bi bi-bootstrap-fill fs-2 text-purple mb-1 d-block" style="color:#7c3aed;"></i>
+          <div class="fw-bold small">Bootstrap 5</div>
+          <div class="text-muted" style="font-size:0.75rem;">Responsive UI</div>
+        </div>
+      </div>
+      <div class="col-md-2 col-4">
+        <div class="p-3 border rounded-3 bg-white h-100">
+          <i class="bi bi-map-fill fs-2 text-success mb-1 d-block"></i>
+          <div class="fw-bold small">Leaflet.js</div>
+          <div class="text-muted" style="font-size:0.75rem;">OpenStreetMap</div>
+        </div>
+      </div>
+      <div class="col-md-2 col-4">
+        <div class="p-3 border rounded-3 bg-white h-100">
+          <i class="bi bi-pie-chart-fill fs-2 text-warning mb-1 d-block"></i>
+          <div class="fw-bold small">Chart.js</div>
+          <div class="text-muted" style="font-size:0.75rem;">Admin Analytics</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Academic Credentials -->
+  <div class="p-4 rounded-4 bg-white border text-center">
+    <h5 class="fw-bold mb-1">Bachelor of Computer Applications (BCA) Capstone Mini Project</h5>
+    <p class="text-secondary small mb-3">Project Title: <strong>CiviNexa AI: AI-Powered Civic Issue Reporting and Tracking System</strong></p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="{{ url_for('report') }}" class="btn btn-brand btn-sm">Try Reporting An Issue</a>
+      <a href="{{ url_for('admin_login') }}" class="btn btn-outline-secondary btn-sm">Explore Admin Portal</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

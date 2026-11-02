@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}CiviNexa AI - AI-Powered Civic Issue Reporting and Tracking System{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-wrapper position-relative">
+  <div class="hero-glow-1"></div>
+  <div class="hero-glow-2"></div>
+  <div class="container position-relative z-1">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div class="hero-badge">
+          <i class="bi bi-stars text-warning"></i>
+          <span>Next-Gen Smart Civic Governance Engine</span>
+        </div>
+        <h1 class="display-4 fw-black text-white lh-tight mb-3">
+          Voice Your Civic Issues. <br>
+          <span class="text-transparent bg-clip-text" style="background: linear-gradient(135deg, #60a5fa 0%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Resolved with AI Precision.
+          </span>
+        </h1>
+        <p class="lead text-light opacity-75 mb-4 pe-lg-4">
+          CiviNexa AI bridges citizens and municipal authorities. Report road potholes, overflowing garbage, broken streetlights, or drainage failures. Our intelligent engine automatically identifies issue categories and routes complaints directly to responsible departments.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mb-4">
+          <a href="{{ url_for('report') }}" class="btn btn-brand btn-lg d-flex align-items-center gap-2">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>Report a Complaint</span>
+          </a>
+          <a href="{{ url_for('track') }}" class="btn btn-outline-light btn-lg d-flex align-items-center gap-2">
+            <i class="bi bi-search"></i>
+            <span>Track by ID</span>
+          </a>
+        </div>
+
+        <!-- Live Quick Stats Strip -->
+        <div class="row g-3 pt-3 border-top border-secondary border-opacity-25 text-white">
+          <div class="col-4">
+            <div class="fs-3 fw-bold text-primary-light" style="color: #93c5fd;">{{ stats.total }}+</div>
+            <div class="small text-secondary">Complaints Logged</div>
+          </div>
+          <div class="col-4">
+            <div class="fs-3 fw-bold text-success" style="color: #6ee7b7;">{{ stats.resolved }}+</div>
+            <div class="small text-secondary">Issues Resolved</div>
+          </div>
+          <div class="col-4">
+            <div class="fs-3 fw-bold text-warning" style="color: #fde047;">6</div>
+            <div class="small text-secondary">Active Depts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual Card -->
+      <div class="col-lg-5">
+        <div class="card-modern p-4 bg-white text-dark shadow-lg border-0" style="border-radius: 20px;">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center gap-2">
+              <span class="ai-pulse-dot"></span>
+              <span class="fw-bold small text-purple">AI Smart Triage Preview</span>
+            </div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Real-Time</span>
+          </div>
+
+          <!-- Interactive Demo Simulation Box -->
+          <div class="p-3 rounded-3 mb-3" style="background:#f8fafc; border: 1px dashed #cbd5e1;">
+            <div class="small text-secondary mb-1">Citizen Complaint Description:</div>
+            <p class="fst-italic fw-medium text-dark small mb-2">
+              "Huge pothole on 4th Main road with deep crater, causing accidents."
+            </p>
+            <div class="ai-smart-box py-2 px-3 mt-2">
+              <div class="d-flex align-items-center justify-content-between small">
+                <span class="fw-semibold text-purple"><i class="bi bi-cpu me-1"></i>AI Classification:</span>
+                <span class="badge bg-success">92% Match</span>
+              </div>
+              <div class="fw-bold text-dark mt-1">Road Maintenance</div>
+              <div class="small text-secondary"><i class="bi bi-building me-1"></i>Assigned: Dept. of Roads & PWD</div>
+            </div>
+          </div>
+
+          <div class="p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-geo-alt-fill text-danger fs-5"></i>
+              <div>
+                <div class="fw-bold small">Instant GPS Pinpoint</div>
+                <div class="text-secondary" style="font-size: 0.75rem;">OpenStreetMap Coordinates</div>
+              </div>
+            </div>
+            <span class="badge bg-dark">Leaflet.js</span>
+          </div>
+
+          <!-- BCA Demonstration Credentials Box -->
+          <div class="mt-3 p-3 border rounded-3 bg-light-subtle small">
+            <div class="fw-bold text-primary mb-1"><i class="bi bi-key-fill me-1"></i>Demo Evaluation Credentials:</div>
+            <div class="d-flex justify-content-between text-muted" style="font-size:0.8rem;">
+              <span><strong>Admin:</strong> admin / admin123</span>
+              <span><strong>Citizen:</strong> rahul.citizen@civinexa.org / citizen123</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Quick Tracking Bar -->
+<section class="py-4 bg-white border-bottom shadow-sm">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <form action="{{ url_for('track') }}" method="GET" class="d-flex gap-2">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0 text-primary">
+              <i class="bi bi-qr-code-scan"></i>
+            </span>
+            <input type="text" name="complaint_id" class="form-control border-start-0 py-2" placeholder="Have a tracking ID? e.g. CNX-2026-1001" required>
+          </div>
+          <button type="submit" class="btn btn-brand px-4 text-nowrap">
+            <i class="bi bi-search me-1"></i>Track Now
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5">
+  <div class="container py-4">
+    <div class="text-center max-w-700 mx-auto mb-5">
+      <span class="badge bg-purple-subtle text-purple fw-bold px-3 py-1 mb-2">Workflow</span>
+      <h2 class="fw-bold text-dark">How CiviNexa AI Solves Civic Problems</h2>
+      <p class="text-secondary">From submission to on-ground municipal action in three streamlined steps.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card-modern p-4 h-100 text-center">
+          <div class="stat-icon icon-blue mx-auto mb-3">
+            <i class="bi bi-camera-fill"></i>
+          </div>
+          <h5 class="fw-bold mb-2">1. Snap & Describe</h5>
+          <p class="text-secondary small">
+            Citizens enter the complaint details, pinpoint the exact location on our Leaflet map, and upload photographic evidence directly from phone or PC.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card-modern p-4 h-100 text-center border-purple">
+          <div class="stat-icon icon-purple mx-auto mb-3">
+            <i class="bi bi-cpu-fill"></i>
+          </div>
+          <h5 class="fw-bold mb-2">2. AI Classification</h5>
+          <p class="text-secondary small">
+            The CiviNexa NLP engine analyzes the issue text, computes confidence scores, and automatically assigns it to the exact responsible civic department.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card-modern p-4 h-100 text-center">
+          <div class="stat-icon icon-green mx-auto mb-3">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <h5 class="fw-bold mb-2">3. Action & Live Tracking</h5>
+          <p class="text-secondary small">
+            Receive a unique Complaint Tracking ID. Track administrative inspection remarks, field worker dispatch, and resolution timelines with 100% transparency.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Civic Categories Supported -->
+<section class="py-5 bg-white border-top border-bottom">
+  <div class="container py-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+      <div>
+        <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1 mb-2">Civic Domains</span>
+        <h2 class="fw-bold text-dark">What Issues Can You Report?</h2>
+      </div>
+      <a href="{{ url_for('report') }}" class="btn btn-outline-primary btn-sm mt-2 mt-md-0">
+        <i class="bi bi-plus-lg me-1"></i>Report Any Civic Issue
+      </a>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4 col-sm-6">
+        <div class="p-3 border rounded-3 h-100 d-flex align-items-start gap-3 bg-light">
+          <div class="stat-icon icon-amber flex-shrink-0">
+            <i class="bi bi-cone-striped"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Roads & Potholes</h6>
+            <p class="text-secondary small mb-1">Crater filling, asphalt damage, cave-ins, and uneven pavements.</p>
+            <span class="badge bg-warning-subtle text-warning-emphasis">Public Works Dept</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-sm-6">
+        <div class="p-3 border rounded-3 h-100 d-flex align-items-start gap-3 bg-light">
+          <div class="stat-icon icon-blue flex-shrink-0">
+            <i class="bi bi-trash3"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Waste & Garbage</h6>
+            <p class="text-secondary small mb-1">Overflowing dustbins, unattended debris, and illegal dumping.</p>
+            <span class="badge bg-info-subtle text-info-emphasis">Sanitation Dept</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-sm-6">
+        <div class="p-3 border rounded-3 h-100 d-flex align-items-start gap-3 bg-light">
+          <div class="stat-icon icon-cyan flex-shrink-0">
+            <i class="bi bi-water"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Drainage & Sewage</h6>
+            <p class="text-secondary small mb-1">Clogged gutters, open manholes, and sewage backflow problems.</p>
+            <span class="badge bg-primary-subtle text-primary-emphasis">Drainage Board</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-sm-6">
+        <div class="p-3 border rounded-3 h-100 d-flex align-items-start gap-3 bg-light">
+          <div class="stat-icon icon-purple flex-shrink-0">
+            <i class="bi bi-lightbulb"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Streetlights & Power</h6>
+            <p class="text-secondary small mb-1">Flickering lamps, dark streets, and hazardous hanging wires.</p>
+            <span class="badge bg-purple-subtle text-purple">Lighting Authority</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-sm-6">
+        <div class="p-3 border rounded-3 h-100 d-flex align-items-start gap-3 bg-light">
+          <div class="stat-icon icon-green flex-shrink-0">
+            <i class="bi bi-droplet-half"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Water Supply & Leakage</h6>
+            <p class="text-secondary small mb-1">Pipeline bursts, dirty drinking water, and zero water pressure.</p>
+            <span class="badge bg-success-subtle text-success-emphasis">Water Board (Jal)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4 col-sm-6">
+        <div class="p-3 border rounded-3 h-100 d-flex align-items-start gap-3 bg-light">
+          <div class="stat-icon icon-red flex-shrink-0">
+            <i class="bi bi-building-gear"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold mb-1">Public Infrastructure</h6>
+            <p class="text-secondary small mb-1">Broken park benches, bus shelters, pedestrian footbridges.</p>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis">Urban Directorate</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="py-5">
+  <div class="container">
+    <div class="card-modern p-5 text-center text-white" style="background: var(--brand-gradient); border-radius: 20px;">
+      <h2 class="display-6 fw-bold mb-3">Ready to Make Your Neighborhood Better?</h2>
+      <p class="lead opacity-90 mb-4 max-w-600 mx-auto">
+        Join hundreds of active citizens contributing to clean, safe, and sustainable city living.
+      </p>
+      <div class="d-flex justify-content-center gap-3">
+        <a href="{{ url_for('report') }}" class="btn btn-light btn-lg text-primary fw-bold">
+          <i class="bi bi-megaphone me-1"></i>Report Issue Now
+        </a>
+        <a href="{{ url_for('register') }}" class="btn btn-outline-light btn-lg fw-semibold">
+          <i class="bi bi-person-plus me-1"></i>Create Citizen Account
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

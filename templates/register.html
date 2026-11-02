@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Citizen Registration - CiviNexa AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-5">
+      <div class="card-modern p-4 p-md-5">
+        <div class="text-center mb-4">
+          <div class="brand-logo-badge mx-auto mb-2" style="width: 48px; height: 48px; font-size: 1.5rem;">
+            <i class="bi bi-person-plus-fill"></i>
+          </div>
+          <h3 class="fw-bold text-dark">Citizen Registration</h3>
+          <p class="text-secondary small">Create your citizen account to report and track civic complaints in your locality.</p>
+        </div>
+
+        <form action="{{ url_for('register') }}" method="POST">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-person"></i></span>
+              <input type="text" name="name" class="form-control" placeholder="e.g. Rahul Sharma" value="{{ name if name else '' }}" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-envelope"></i></span>
+              <input type="email" name="email" class="form-control" placeholder="name@domain.com" value="{{ email if email else '' }}" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Mobile Number</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-phone"></i></span>
+              <input type="tel" name="phone" class="form-control" placeholder="+91 98765 43210" value="{{ phone if phone else '' }}">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-lock"></i></span>
+              <input type="password" name="password" class="form-control" placeholder="Minimum 6 characters" required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-shield-lock"></i></span>
+              <input type="password" name="confirm_password" class="form-control" placeholder="Re-enter password" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-brand w-100 py-2 fw-semibold">
+            <i class="bi bi-person-check-fill me-1"></i>Create Account
+          </button>
+        </form>
+
+        <div class="text-center mt-4 pt-3 border-top small text-secondary">
+          Already registered? <a href="{{ url_for('login') }}" class="text-primary fw-semibold">Log in here</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

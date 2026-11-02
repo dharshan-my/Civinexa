@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Citizen Dashboard - CiviNexa AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <!-- Top Greeting & Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1 mb-1">Citizen Portal</span>
+      <h2 class="fw-bold text-dark mb-0">Welcome, {{ session.get('user_name') }}</h2>
+      <p class="text-secondary small mb-0">Track the live resolution status of all civic complaints logged by you.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('report') }}" class="btn btn-brand">
+        <i class="bi bi-plus-circle me-1"></i>Report New Issue
+      </a>
+      <a href="{{ url_for('track') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-search me-1"></i>Track by ID
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-secondary small fw-semibold">Total Reported</div>
+            <div class="fs-3 fw-bold text-dark">{{ total_count }}</div>
+          </div>
+          <div class="stat-icon icon-blue">
+            <i class="bi bi-file-earmark-text"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-secondary small fw-semibold">Under Review</div>
+            <div class="fs-3 fw-bold text-warning">{{ review_count }}</div>
+          </div>
+          <div class="stat-icon icon-amber">
+            <i class="bi bi-hourglass-split"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-secondary small fw-semibold">In Progress</div>
+            <div class="fs-3 fw-bold text-purple">{{ in_progress_count }}</div>
+          </div>
+          <div class="stat-icon icon-purple">
+            <i class="bi bi-tools"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <div class="text-secondary small fw-semibold">Resolved</div>
+            <div class="fs-3 fw-bold text-success">{{ resolved_count }}</div>
+          </div>
+          <div class="stat-icon icon-green">
+            <i class="bi bi-check2-all"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- My Submitted Complaints Section -->
+  <div class="card-modern">
+    <div class="p-3 px-4 border-bottom d-flex justify-content-between align-items-center bg-light">
+      <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-collection me-2 text-primary"></i>My Civic Complaints</h5>
+      <span class="badge bg-secondary">{{ complaints|length }} Records</span>
+    </div>
+
+    {% if complaints %}
+      <div class="table-responsive">
+        <table class="table-civic">
+          <thead>
+            <tr>
+              <th>Tracking ID</th>
+              <th>Issue Title</th>
+              <th>AI Category</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Reported On</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in complaints %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('track', complaint_id=item.complaint_id) }}" class="fw-bold text-decoration-none text-primary">
+                    <i class="bi bi-ticket-perforated me-1"></i>{{ item.complaint_id }}
+                  </a>
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark text-truncate" style="max-width: 240px;">
+                    {{ item.complaint_title }}
+                  </div>
+                  <div class="text-muted small" style="font-size: 0.75rem;">
+                    {{ item.suggested_department }}
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-light text-dark border">
+                    {{ item.category }}
+                  </span>
+                </td>
+                <td>
+                  <div class="small text-truncate" style="max-width: 180px;" title="{{ item.location }}">
+                    <i class="bi bi-geo-alt text-danger me-1"></i>{{ item.location }}
+                  </div>
+                </td>
+                <td>
+                  {% if item.status == 'Submitted' %}
+                    <span class="badge badge-status-submitted px-2 py-1"><i class="bi bi-send me-1"></i>Submitted</span>
+                  {% elif item.status == 'Under Review' %}
+                    <span class="badge badge-status-under-review px-2 py-1"><i class="bi bi-eye me-1"></i>Under Review</span>
+                  {% elif item.status == 'In Progress' %}
+                    <span class="badge badge-status-in-progress px-2 py-1"><i class="bi bi-gear-wide-connected me-1"></i>In Progress</span>
+                  {% elif item.status == 'Resolved' %}
+                    <span class="badge badge-status-resolved px-2 py-1"><i class="bi bi-check-circle me-1"></i>Resolved</span>
+                  {% else %}
+                    <span class="badge badge-status-rejected px-2 py-1"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+                  {% endif %}
+                </td>
+                <td class="small text-muted">
+                  {{ item.created_date[:10] }}
+                </td>
+                <td class="text-end">
+                  <a href="{{ url_for('track', complaint_id=item.complaint_id) }}" class="btn btn-sm btn-outline-primary" title="View Full Timeline">
+                    <i class="bi bi-clock-history me-1"></i>Track
+                  </a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="p-5 text-center">
+        <div class="stat-icon icon-blue mx-auto mb-3" style="width: 64px; height: 64px; font-size: 2rem;">
+          <i class="bi bi-folder2-open"></i>
+        </div>
+        <h5 class="fw-bold text-dark">No Complaints Submitted Yet</h5>
+        <p class="text-secondary small max-w-500 mx-auto mb-4">
+          Notice a pothole, uncollected garbage, or a dark streetlight? File your first complaint today and let our AI engine dispatch it to the municipal team.
+        </p>
+        <a href="{{ url_for('report') }}" class="btn btn-brand">
+          <i class="bi bi-plus-circle me-1"></i>Report a Civic Issue Now
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

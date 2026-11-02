@@ -1,0 +1,275 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - CiviNexa AI Control Center{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4">
+
+  <!-- Admin Header Bar -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <span class="badge bg-purple text-white px-3 py-1" style="background:#7c3aed;">
+          <i class="bi bi-shield-check me-1"></i>Municipal Command
+        </span>
+        <span class="text-secondary small">Logged in as: <strong>{{ session.get('admin_username') }}</strong> ({{ session.get('admin_role') }})</span>
+      </div>
+      <h2 class="fw-bold text-dark mb-0">Executive Grievance Analytics Dashboard</h2>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('complaints') }}" class="btn btn-brand">
+        <i class="bi bi-list-check me-1"></i>Manage All Complaints
+      </a>
+      <a href="{{ url_for('admin_logout') }}" class="btn btn-outline-danger">
+        <i class="bi bi-box-arrow-right me-1"></i>Logout
+      </a>
+    </div>
+  </div>
+
+  <!-- KPI Metrics Cards Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card">
+        <div class="text-secondary small fw-semibold">Total Complaints</div>
+        <div class="fs-3 fw-bold text-dark mt-1">{{ stats.total }}</div>
+        <div class="small text-primary"><i class="bi bi-folder-fill me-1"></i>Cumulative</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card">
+        <div class="text-secondary small fw-semibold">New Submitted</div>
+        <div class="fs-3 fw-bold text-info mt-1">{{ stats.submitted }}</div>
+        <div class="small text-muted"><i class="bi bi-inbox-fill me-1"></i>Awaiting triage</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card">
+        <div class="text-secondary small fw-semibold">Under Review</div>
+        <div class="fs-3 fw-bold text-warning mt-1">{{ stats.under_review }}</div>
+        <div class="small text-muted"><i class="bi bi-eye-fill me-1"></i>Site inspection</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card">
+        <div class="text-secondary small fw-semibold">In Progress</div>
+        <div class="fs-3 fw-bold text-purple mt-1">{{ stats.in_progress }}</div>
+        <div class="small text-muted"><i class="bi bi-tools me-1"></i>Crew dispatched</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card">
+        <div class="text-secondary small fw-semibold">Resolved</div>
+        <div class="fs-3 fw-bold text-success mt-1">{{ stats.resolved }}</div>
+        <div class="small text-success"><i class="bi bi-check-circle-fill me-1"></i>Closed & Fixed</div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="stat-card">
+        <div class="text-secondary small fw-semibold">Rejected</div>
+        <div class="fs-3 fw-bold text-danger mt-1">{{ stats.rejected }}</div>
+        <div class="small text-danger"><i class="bi bi-x-circle-fill me-1"></i>Out of jurisdiction</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Charts Row (Chart.js) -->
+  <div class="row g-4 mb-4">
+    <!-- Category Breakdown Chart -->
+    <div class="col-lg-7">
+      <div class="card-modern p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Complaints by Civic Category</h5>
+          <span class="badge bg-light text-dark border">AI Classified</span>
+        </div>
+        <p class="text-secondary small">Volume distribution across municipal public services:</p>
+        <div style="position: relative; height: 280px;">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Distribution Doughnut Chart -->
+    <div class="col-lg-5">
+      <div class="card-modern p-4 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-pie-chart-fill text-purple me-2"></i>Status Breakdown</h5>
+          <span class="badge bg-light text-dark border">Real-Time</span>
+        </div>
+        <p class="text-secondary small">Current lifecycle progression of all recorded civic issues:</p>
+        <div style="position: relative; height: 280px;">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Complaints Feed -->
+  <div class="card-modern">
+    <div class="p-3 px-4 border-bottom d-flex justify-content-between align-items-center bg-light">
+      <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-activity me-2 text-danger"></i>Recent Complaint Feed</h5>
+      <a href="{{ url_for('complaints') }}" class="btn btn-sm btn-outline-primary">
+        View All Complaints &rarr;
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-civic">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Location</th>
+            <th>Status</th>
+            <th>Priority</th>
+            <th>Logged Date</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in stats.recent_complaints %}
+            <tr>
+              <td>
+                <span class="fw-bold text-primary">{{ item.complaint_id }}</span>
+              </td>
+              <td>
+                <div class="fw-semibold text-dark text-truncate" style="max-width: 250px;">
+                  {{ item.complaint_title }}
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-light text-dark border">{{ item.category }}</span>
+              </td>
+              <td>
+                <div class="small text-truncate" style="max-width: 180px;">
+                  <i class="bi bi-geo-alt text-danger me-1"></i>{{ item.location }}
+                </div>
+              </td>
+              <td>
+                {% if item.status == 'Submitted' %}
+                  <span class="badge badge-status-submitted">Submitted</span>
+                {% elif item.status == 'Under Review' %}
+                  <span class="badge badge-status-under-review">Under Review</span>
+                {% elif item.status == 'In Progress' %}
+                  <span class="badge badge-status-in-progress">In Progress</span>
+                {% elif item.status == 'Resolved' %}
+                  <span class="badge badge-status-resolved">Resolved</span>
+                {% else %}
+                  <span class="badge badge-status-rejected">Rejected</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if item.priority == 'Urgent' %}
+                  <span class="badge badge-priority-urgent">Urgent</span>
+                {% elif item.priority == 'High' %}
+                  <span class="badge badge-priority-high">High</span>
+                {% elif item.priority == 'Medium' %}
+                  <span class="badge badge-priority-medium">Medium</span>
+                {% else %}
+                  <span class="badge badge-priority-low">Low</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">{{ item.created_date }}</td>
+              <td class="text-end">
+                <a href="{{ url_for('track', complaint_id=item.complaint_id) }}" class="btn btn-sm btn-light border" title="Inspect">
+                  <i class="bi bi-eye"></i>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Fetch Chart Data from stats
+    const categoryData = {{ stats.category_counts|tojson }};
+    const statusData = {{ stats.status_counts|tojson }};
+
+    // 1. Render Category Chart (Bar Chart)
+    const catLabels = Object.keys(categoryData);
+    const catValues = Object.values(categoryData);
+
+    const ctxCat = document.getElementById("categoryChart").getContext("2d");
+    new Chart(ctxCat, {
+      type: "bar",
+      data: {
+        labels: catLabels.length ? catLabels : ["No Data"],
+        datasets: [{
+          label: "Number of Complaints",
+          data: catValues.length ? catValues : [0],
+          backgroundColor: [
+            "rgba(37, 99, 235, 0.8)",
+            "rgba(124, 58, 237, 0.8)",
+            "rgba(6, 182, 212, 0.8)",
+            "rgba(245, 158, 11, 0.8)",
+            "rgba(16, 185, 129, 0.8)",
+            "rgba(239, 68, 68, 0.8)"
+          ],
+          borderRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0 }
+          }
+        }
+      }
+    });
+
+    // 2. Render Status Chart (Doughnut Chart)
+    const statusLabels = ["Submitted", "Under Review", "In Progress", "Resolved", "Rejected"];
+    const statusValues = statusLabels.map(st => statusData[st] || 0);
+
+    const ctxStatus = document.getElementById("statusChart").getContext("2d");
+    new Chart(ctxStatus, {
+      type: "doughnut",
+      data: {
+        labels: statusLabels,
+        datasets: [{
+          data: statusValues,
+          backgroundColor: [
+            "#0284c7", // Submitted (cyan-blue)
+            "#f59e0b", // Under Review (amber)
+            "#7c3aed", // In Progress (purple)
+            "#10b981", // Resolved (green)
+            "#ef4444"  // Rejected (red)
+          ],
+          borderWidth: 2,
+          borderColor: "#ffffff"
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: { boxWidth: 12, font: { size: 11 } }
+          }
+        },
+        cutout: "65%"
+      }
+    });
+  });
+</script>
+{% endblock %}

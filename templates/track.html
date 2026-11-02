@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Track Complaint Status - CiviNexa AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Search Header -->
+  <div class="text-center max-w-700 mx-auto mb-4">
+    <span class="badge bg-purple-subtle text-purple fw-bold px-3 py-1 mb-2">Live Grievance Tracking</span>
+    <h2 class="fw-bold text-dark">Track Your Complaint Progress</h2>
+    <p class="text-secondary small">
+      Enter your unique Complaint ID (e.g., CNX-2026-1001) to view department assignments, inspection remarks, and resolution timelines.
+    </p>
+
+    <!-- Search Box -->
+    <form action="{{ url_for('track') }}" method="GET" class="mt-3">
+      <div class="input-group input-group-lg shadow-sm">
+        <span class="input-group-text bg-white border-end-0 text-primary">
+          <i class="bi bi-qr-code-scan"></i>
+        </span>
+        <input type="text" name="complaint_id" class="form-control border-start-0 fs-6" 
+               placeholder="Enter Complaint Tracking ID (e.g., CNX-2026-1001)" 
+               value="{{ search_id if search_id else '' }}" required>
+        <button type="submit" class="btn btn-brand px-4 fs-6">
+          <i class="bi bi-search me-1"></i>Track Now
+        </button>
+      </div>
+      <!-- Quick Demo IDs Pills -->
+      <div class="mt-2 d-flex flex-wrap justify-content-center gap-2 small text-secondary">
+        <span>Try Demo Complaints:</span>
+        <a href="{{ url_for('track', complaint_id='CNX-2026-1001') }}" class="badge bg-light text-dark border text-decoration-none">CNX-2026-1001 (Road)</a>
+        <a href="{{ url_for('track', complaint_id='CNX-2026-1002') }}" class="badge bg-light text-dark border text-decoration-none">CNX-2026-1002 (Waste)</a>
+        <a href="{{ url_for('track', complaint_id='CNX-2026-1003') }}" class="badge bg-light text-dark border text-decoration-none">CNX-2026-1003 (Water)</a>
+        <a href="{{ url_for('track', complaint_id='CNX-2026-1004') }}" class="badge bg-light text-dark border text-decoration-none">CNX-2026-1004 (Resolved)</a>
+      </div>
+    </form>
+  </div>
+
+  {% if complaint %}
+    <!-- Complaint Details Found -->
+    <div class="row g-4 justify-content-center mt-2">
+      
+      <!-- Left Column: Details, Image, Map -->
+      <div class="col-lg-7">
+        <div class="card-modern p-4 mb-4">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 border-bottom pb-3 mb-3">
+            <div>
+              <span class="text-secondary small">Complaint ID</span>
+              <h4 class="fw-bold text-primary mb-0"><i class="bi bi-ticket-detailed me-1"></i>{{ complaint.complaint_id }}</h4>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              {% if complaint.status == 'Submitted' %}
+                <span class="badge badge-status-submitted fs-6 px-3 py-2"><i class="bi bi-send me-1"></i>Submitted</span>
+              {% elif complaint.status == 'Under Review' %}
+                <span class="badge badge-status-under-review fs-6 px-3 py-2"><i class="bi bi-eye me-1"></i>Under Review</span>
+              {% elif complaint.status == 'In Progress' %}
+                <span class="badge badge-status-in-progress fs-6 px-3 py-2"><i class="bi bi-gear-wide-connected me-1"></i>In Progress</span>
+              {% elif complaint.status == 'Resolved' %}
+                <span class="badge badge-status-resolved fs-6 px-3 py-2"><i class="bi bi-check-circle me-1"></i>Resolved</span>
+              {% else %}
+                <span class="badge badge-status-rejected fs-6 px-3 py-2"><i class="bi bi-x-circle me-1"></i>Rejected</span>
+              {% endif %}
+
+              {% if complaint.priority == 'Urgent' %}
+                <span class="badge badge-priority-urgent px-2 py-2">Urgent</span>
+              {% elif complaint.priority == 'High' %}
+                <span class="badge badge-priority-high px-2 py-2">High</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <h5 class="fw-bold text-dark mb-2">{{ complaint.complaint_title }}</h5>
+          <p class="text-secondary mb-4">{{ complaint.description }}</p>
+
+          <!-- Metadata Grid -->
+          <div class="row g-3 p-3 bg-light rounded-3 mb-4">
+            <div class="col-sm-6">
+              <div class="text-muted small">Category (AI Detected):</div>
+              <div class="fw-bold text-dark"><i class="bi bi-tag-fill text-purple me-1"></i>{{ complaint.category }}</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="text-muted small">Responsible Authority:</div>
+              <div class="fw-bold text-dark"><i class="bi bi-building text-primary me-1"></i>{{ complaint.suggested_department }}</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="text-muted small">Location Address:</div>
+              <div class="fw-bold text-dark text-truncate" title="{{ complaint.location }}"><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ complaint.location }}</div>
+            </div>
+            <div class="col-sm-6">
+              <div class="text-muted small">Reported Date & Time:</div>
+              <div class="fw-bold text-dark"><i class="bi bi-calendar3 text-info me-1"></i>{{ complaint.created_date }}</div>
+            </div>
+          </div>
+
+          <!-- Photographic Evidence (if attached) -->
+          {% if complaint.image_path %}
+            <div class="mb-4">
+              <h6 class="fw-bold text-dark mb-2"><i class="bi bi-image me-1 text-primary"></i>Uploaded Photographic Evidence</h6>
+              <div class="p-2 border rounded-3 bg-light text-center">
+                <img src="{{ url_for('uploaded_file', filename=complaint.image_path) }}" alt="Issue Photo" class="img-fluid rounded" style="max-height: 280px;">
+              </div>
+            </div>
+          {% endif %}
+
+          <!-- Leaflet Location Map View -->
+          <div>
+            <h6 class="fw-bold text-dark mb-2"><i class="bi bi-map me-1 text-success"></i>Geographic Pinpoint</h6>
+            <div id="trackMap" class="map-container rounded-3"></div>
+            <div class="small text-muted mt-1">
+              Coordinates: Lat {{ complaint.latitude }}, Long {{ complaint.longitude }}
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-top d-flex justify-content-between">
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-printer me-1"></i>Print Grievance Receipt
+            </button>
+            <a href="{{ url_for('report') }}" class="btn btn-brand btn-sm">
+              <i class="bi bi-plus-circle me-1"></i>Report Another Issue
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right Column: Status Progression Timeline -->
+      <div class="col-lg-5">
+        <div class="card-modern p-4 sticky-top" style="top: 80px;">
+          <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+            <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>Audit Trail & Timeline</h5>
+            <span class="badge bg-light text-dark border">{{ history|length }} Updates</span>
+          </div>
+
+          <p class="text-secondary small mb-3">
+            Chronological audit of status updates and field inspection remarks logged by municipal authorities:
+          </p>
+
+          <!-- Timeline Container -->
+          <div class="tracking-timeline">
+            {% for item in history %}
+              <div class="timeline-step">
+                <div class="timeline-node {% if item.new_status == 'Resolved' %}resolved{% elif loop.last %}active{% endif %}">
+                  {% if item.new_status == 'Resolved' %}
+                    <i class="bi bi-check-lg"></i>
+                  {% elif item.new_status == 'In Progress' %}
+                    <i class="bi bi-tools"></i>
+                  {% elif item.new_status == 'Under Review' %}
+                    <i class="bi bi-eye"></i>
+                  {% elif item.new_status == 'Rejected' %}
+                    <i class="bi bi-x-lg"></i>
+                  {% else %}
+                    <i class="bi bi-send"></i>
+                  {% endif %}
+                </div>
+                <div class="timeline-content">
+                  <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="fw-bold text-dark">{{ item.new_status }}</span>
+                    <span class="small text-muted" style="font-size: 0.75rem;">{{ item.updated_date }}</span>
+                  </div>
+                  <div class="text-secondary small">
+                    <i class="bi bi-chat-left-quote text-primary me-1"></i>{{ item.admin_remarks }}
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Current Resolution SLA Notice -->
+          <div class="p-3 bg-purple-subtle rounded-3 mt-4 border border-purple-subtle small">
+            <div class="fw-semibold text-purple mb-1"><i class="bi bi-info-circle me-1"></i>Municipal Service Guarantee (SLA)</div>
+            <div class="text-secondary" style="font-size: 0.8rem;">
+              Critical road hazards and water pipeline emergencies are prioritized for inspection within 24-48 hours.
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  {% elif search_id %}
+    <!-- Not Found State -->
+    <div class="text-center py-5">
+      <div class="stat-icon icon-red mx-auto mb-3" style="width: 64px; height: 64px; font-size: 2rem;">
+        <i class="bi bi-search"></i>
+      </div>
+      <h4 class="fw-bold text-dark">No Complaint Found</h4>
+      <p class="text-secondary small max-w-500 mx-auto mb-4">
+        We could not find any grievance recorded with tracking ID <strong>{{ search_id }}</strong>. Please verify the ID or check your citizen dashboard.
+      </p>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary me-2">Go to Dashboard</a>
+      <a href="{{ url_for('report') }}" class="btn btn-brand">File a New Complaint</a>
+    </div>
+  {% else %}
+    <!-- Blank Search State (Prompt to search) -->
+    <div class="row justify-content-center mt-4">
+      <div class="col-md-8 col-lg-6 text-center py-5">
+        <div class="stat-icon icon-blue mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2.2rem;">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <h5 class="fw-bold text-dark">Enter an ID to Begin Tracking</h5>
+        <p class="text-secondary small">
+          Every complaint registered on CiviNexa receives an official tracking code. Enter it above to see real-time status progression.
+        </p>
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% if complaint %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const lat = {{ complaint.latitude if complaint.latitude else 12.9716 }};
+    const lng = {{ complaint.longitude if complaint.longitude else 77.5946 }};
+    initTrackMap(lat, lng, "{{ complaint.complaint_title|escape }}");
+  });
+</script>
+{% endif %}
+{% endblock %}

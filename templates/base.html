@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CiviNexa AI - Civic Issue Reporting and Tracking System{% endblock %}</title>
+
+  <!-- Google Fonts (Inter) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5.3 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Leaflet Maps CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-civinexa sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('index') }}">
+        <div class="brand-logo-badge">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div>
+          <span class="brand-text-main">CiviNexa</span>
+          <span class="brand-text-sub">AI</span>
+        </div>
+      </a>
+
+      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#civinexaNav" aria-controls="civinexaNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="civinexaNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" href="{{ url_for('index') }}">
+              <i class="bi bi-house-door me-1"></i>Home
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'report' %}active{% endif %}" href="{{ url_for('report') }}">
+              <i class="bi bi-megaphone me-1"></i>Report Issue
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'track' %}active{% endif %}" href="{{ url_for('track') }}">
+              <i class="bi bi-geo-alt me-1"></i>Track Status
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'about' %}active{% endif %}" href="{{ url_for('about') }}">
+              <i class="bi bi-info-circle me-1"></i>About Us
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.endpoint == 'contact' %}active{% endif %}" href="{{ url_for('contact') }}">
+              <i class="bi bi-telephone me-1"></i>Contact
+            </a>
+          </li>
+        </ul>
+
+        <!-- Right Side Nav: Auth Controls -->
+        <div class="d-flex align-items-center gap-2">
+          {% if session.get('user_id') %}
+            <!-- Citizen Logged In -->
+            <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
+              <i class="bi bi-person-circle"></i>
+              <span>{{ session.get('user_name') }}</span>
+            </a>
+            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-light border text-danger" title="Logout">
+              <i class="bi bi-box-arrow-right"></i>
+            </a>
+
+          {% elif session.get('admin_id') %}
+            <!-- Administrator Logged In -->
+            <a href="{{ url_for('admin_dashboard') }}" class="btn btn-sm btn-purple text-white" style="background:#7c3aed;">
+              <i class="bi bi-speedometer2 me-1"></i>Admin Dashboard
+            </a>
+            <a href="{{ url_for('complaints') }}" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-list-check me-1"></i>Complaints
+            </a>
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-light border text-danger" title="Admin Logout">
+              <i class="bi bi-box-arrow-right"></i>
+            </a>
+
+          {% else %}
+            <!-- Guest -->
+            <a href="{{ url_for('login') }}" class="btn btn-sm btn-brand-outline">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Citizen Login
+            </a>
+            <a href="{{ url_for('register') }}" class="btn btn-sm btn-brand">
+              <i class="bi bi-person-plus me-1"></i>Register
+            </a>
+            <a href="{{ url_for('admin_login') }}" class="btn btn-sm nav-admin-link rounded-2 ms-1 text-decoration-none" title="Admin Portal">
+              <i class="bi bi-shield-lock me-1"></i>Admin
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Messages Container -->
+  <div class="container mt-3">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show card-modern shadow-sm border-0 d-flex align-items-center gap-2" role="alert">
+            {% if category == 'success' %}
+              <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            {% elif category == 'danger' %}
+              <i class="bi bi-exclamation-octagon-fill text-danger fs-5"></i>
+            {% elif category == 'warning' %}
+              <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+            {% else %}
+              <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+            {% endif %}
+            <div class="flex-grow-1">{{ message }}</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Main Content Block -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer-civinexa">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="brand-logo-badge">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <span class="fs-4 fw-bold text-white">CiviNexa <span class="badge bg-purple" style="background:#7c3aed;">AI</span></span>
+          </div>
+          <p class="text-secondary small pe-lg-4">
+            Next-generation AI-powered civic issue reporting and municipal tracking system. Empowering citizens to build cleaner, safer, and smarter communities with transparent governance.
+          </p>
+          <div class="d-flex gap-2">
+            <span class="badge bg-dark border text-light"><i class="bi bi-cpu me-1 text-primary"></i>AI Triage v2.4</span>
+            <span class="badge bg-dark border text-light"><i class="bi bi-map me-1 text-success"></i>OpenStreetMap</span>
+          </div>
+        </div>
+
+        <div class="col-6 col-lg-2">
+          <h6 class="text-white fw-bold mb-3">Quick Links</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="{{ url_for('index') }}"><i class="bi bi-chevron-right me-1"></i>Home</a></li>
+            <li><a href="{{ url_for('report') }}"><i class="bi bi-chevron-right me-1"></i>Report Issue</a></li>
+            <li><a href="{{ url_for('track') }}"><i class="bi bi-chevron-right me-1"></i>Track Complaint</a></li>
+            <li><a href="{{ url_for('about') }}"><i class="bi bi-chevron-right me-1"></i>About System</a></li>
+            <li><a href="{{ url_for('contact') }}"><i class="bi bi-chevron-right me-1"></i>Help Desk</a></li>
+          </ul>
+        </div>
+
+        <div class="col-6 col-lg-3">
+          <h6 class="text-white fw-bold mb-3">Civic Categories</h6>
+          <ul class="list-unstyled small d-flex flex-column gap-2">
+            <li><a href="{{ url_for('report') }}"><i class="bi bi-cone-striped me-1 text-warning"></i>Road Maintenance</a></li>
+            <li><a href="{{ url_for('report') }}"><i class="bi bi-trash3 me-1 text-info"></i>Waste Management</a></li>
+            <li><a href="{{ url_for('report') }}"><i class="bi bi-water me-1 text-primary"></i>Drainage & Sewage</a></li>
+            <li><a href="{{ url_for('report') }}"><i class="bi bi-lightbulb me-1 text-warning"></i>Electricity & Lighting</a></li>
+            <li><a href="{{ url_for('report') }}"><i class="bi bi-droplet-half me-1 text-cyan"></i>Water Supply Board</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3">
+          <h6 class="text-white fw-bold mb-3">Emergency Civic Lines</h6>
+          <div class="d-flex flex-column gap-2 small">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-telephone-inbound text-primary fs-5"></i>
+              <div>
+                <div class="text-white fw-semibold">1800-CIVIC-NEXA</div>
+                <div class="text-secondary" style="font-size:0.75rem;">Toll-Free 24x7 Control Room</div>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-envelope text-info fs-5"></i>
+              <div>
+                <div class="text-white fw-semibold">support@civinexa.org</div>
+                <div class="text-secondary" style="font-size:0.75rem;">Citizen Grievance Email</div>
+              </div>
+            </div>
+            <div class="mt-2">
+              <a href="{{ url_for('admin_login') }}" class="btn btn-sm btn-outline-secondary w-100 py-1">
+                <i class="bi bi-shield-lock me-1"></i>Municipal Admin Portal
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="border-secondary my-4 opacity-25">
+
+      <div class="d-flex flex-column flex-md-row align-items-center justify-content-between small text-secondary">
+        <div>&copy; 2026 CiviNexa AI. All Rights Reserved. Built for Smart City Governance & BCA Capstone Demonstration.</div>
+        <div class="d-flex gap-3 mt-2 mt-md-0">
+          <span><i class="bi bi-shield-check text-success me-1"></i>256-Bit SSL Secured</span>
+          <span><i class="bi bi-check-all text-info me-1"></i>SQLite Real-Time Sync</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap 5.3 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Leaflet Maps JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Chart.js for Dashboards -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Custom Script -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

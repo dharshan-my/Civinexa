@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Administrator Portal Login - CiviNexa AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-7 col-lg-5">
+      <div class="card-modern p-4 p-md-5 border-top border-4" style="border-top-color: #7c3aed !important;">
+        <div class="text-center mb-4">
+          <div class="stat-icon icon-purple mx-auto mb-2" style="width: 52px; height: 52px; font-size: 1.6rem;">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+          <span class="badge bg-purple-subtle text-purple fw-bold px-3 py-1 mb-2">Municipal Command Center</span>
+          <h3 class="fw-bold text-dark">Administrator Portal</h3>
+          <p class="text-secondary small">Authorized civic administrators and departmental supervisors login here.</p>
+        </div>
+
+        <form action="{{ url_for('admin_login') }}" method="POST" id="adminLoginForm">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Admin Username <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-person-badge"></i></span>
+              <input type="text" name="username" id="adminUsername" class="form-control" placeholder="admin" required>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label small fw-semibold">Security Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><i class="bi bi-key"></i></span>
+              <input type="password" name="password" id="adminPassword" class="form-control" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-purple text-white w-100 py-2 fw-semibold mb-3" style="background:#7c3aed;">
+            <i class="bi bi-shield-check me-1"></i>Authenticate Admin
+          </button>
+
+          <!-- Quick Fill Demo Admin Credentials -->
+          <button type="button" class="btn btn-outline-secondary btn-sm w-100 py-2" id="btnFillDemoAdmin">
+            <i class="bi bi-lightning-charge-fill text-warning me-1"></i>Fill Demo Admin Credentials (admin / admin123)
+          </button>
+        </form>
+
+        <div class="mt-4 pt-3 border-top text-center small text-secondary">
+          <div class="text-danger fw-semibold mb-1"><i class="bi bi-shield-exclamation me-1"></i>Authorized Personnel Only</div>
+          Unauthorized access attempts are monitored and logged. <br>
+          <a href="{{ url_for('login') }}" class="text-primary text-decoration-none mt-2 d-inline-block">&larr; Return to Citizen Login</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.getElementById("btnFillDemoAdmin").addEventListener("click", function() {
+    document.getElementById("adminUsername").value = "admin";
+    document.getElementById("adminPassword").value = "admin123";
+  });
+</script>
+{% endblock %}

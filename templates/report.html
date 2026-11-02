@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Report a Civic Issue - CiviNexa AI{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      
+      <!-- Page Header -->
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1 mb-1">Grievance Submission</span>
+          <h2 class="fw-bold text-dark mb-0">Report a Civic Problem</h2>
+          <p class="text-secondary small mb-0">Our AI model analyzes your report in real time to categorize and route it.</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm">
+          <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+      </div>
+
+      <!-- Main Reporting Form Card -->
+      <div class="card-modern p-4 p-md-5">
+        <form action="{{ url_for('report') }}" method="POST" enctype="multipart/form-data" id="reportComplaintForm">
+          
+          <div class="row g-4">
+            <!-- Left Column: Title, Description, AI Assistant -->
+            <div class="col-lg-6">
+              
+              <!-- Complaint Title -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Complaint Title <span class="text-danger">*</span></label>
+                <input type="text" name="complaint_title" id="complaint_title" class="form-control py-2" 
+                       placeholder="e.g. Dangerous pothole near metro station" 
+                       value="{{ title if title else '' }}" required>
+                <div class="form-text">Provide a concise headline describing the civic problem.</div>
+              </div>
+
+              <!-- Complaint Description -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <label class="form-label fw-semibold small mb-0">Detailed Description <span class="text-danger">*</span></label>
+                  <button type="button" class="btn btn-link btn-sm text-purple p-0 text-decoration-none" id="btnTriggerAI">
+                    <i class="bi bi-magic me-1"></i>Analyze with AI
+                  </button>
+                </div>
+                <textarea name="description" id="description" rows="5" class="form-control" 
+                          placeholder="Describe the problem, severity, duration, and hazards (e.g. Deep crater on road causing skidding of bikes during rain for 3 days)..." required>{{ description if description else '' }}</textarea>
+                <div class="form-text">As you type, CiviNexa AI detects the category and responsible department.</div>
+              </div>
+
+              <!-- Real-Time AI Suggestion Box -->
+              <div id="aiSuggestionBox" class="ai-smart-box mb-4 d-none">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="ai-pulse-dot"></span>
+                    <span class="fw-bold small text-purple"><i class="bi bi-cpu-fill me-1"></i>AI Real-Time Analysis</span>
+                  </div>
+                  <span id="aiConfidenceText" class="badge bg-purple text-white">85% confidence</span>
+                </div>
+                
+                <div class="mb-2">
+                  <div class="text-secondary small">Suggested Category:</div>
+                  <div id="aiCategoryText" class="fw-bold text-dark fs-6">Road Maintenance</div>
+                </div>
+
+                <div class="mb-2">
+                  <div class="text-secondary small">Responsible Department:</div>
+                  <div id="aiDepartmentText" class="small fw-semibold text-primary">Department of Roads & Infrastructure / PWD</div>
+                </div>
+
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between align-items-center small text-secondary mb-1">
+                    <span>Priority Assessed: <strong id="aiPriorityText" class="text-danger">High</strong></span>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div id="aiConfidenceBar" class="progress-bar bg-purple" role="progressbar" style="width: 85%;"></div>
+                  </div>
+                </div>
+
+                <button type="button" class="btn btn-sm btn-purple text-white w-100" id="btnApplyAISuggestion" style="background:#7c3aed;">
+                  <i class="bi bi-magic me-1"></i>Apply AI Suggestion to Form
+                </button>
+              </div>
+
+              <!-- Category Selection (AI Auto-fills this) -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Complaint Category</label>
+                <select name="category" id="categorySelect" class="form-select py-2">
+                  <option value="Auto-Detect with AI" selected>✨ Auto-Detect with AI (Recommended)</option>
+                  <option value="Road Maintenance">Road Maintenance (Potholes, Asphalt, Pavements)</option>
+                  <option value="Waste Management">Waste Management (Garbage, Bins, Sanitation)</option>
+                  <option value="Drainage & Sewage">Drainage & Sewage (Waterlogging, Gutters, Manholes)</option>
+                  <option value="Electricity & Lighting">Electricity & Lighting (Streetlights, Cables, Outages)</option>
+                  <option value="Water Supply">Water Supply (Pipe Burst, Leakage, Dirty Water)</option>
+                  <option value="Public Infrastructure">Public Infrastructure (Parks, Benches, Bus Shelters)</option>
+                </select>
+                <div class="form-text">You can leave this on Auto-Detect, or override manually if needed.</div>
+              </div>
+
+              <!-- Photographic Evidence Upload -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Upload Photograph Evidence</label>
+                <input type="file" name="complaint_image" id="complaintImage" class="form-control" accept="image/*">
+                <div class="form-text">Accepted formats: JPG, PNG, WEBP (Max: 8MB). High resolution photo speeds up resolution.</div>
+                
+                <!-- Image Preview Container -->
+                <div id="imagePreviewContainer" class="mt-2 d-none">
+                  <div class="p-2 border rounded-3 bg-light text-center position-relative">
+                    <img id="imagePreview" src="#" alt="Selected Image Preview" class="img-fluid rounded" style="max-height: 180px;">
+                    <div class="small text-muted mt-1"><i class="bi bi-check-circle-fill text-success me-1"></i>Image attached for submission</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right Column: Leaflet Map & Geolocation -->
+            <div class="col-lg-6">
+              
+              <!-- Location Address Input -->
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Location Address / Landmark <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-light text-muted"><i class="bi bi-geo-alt-fill text-danger"></i></span>
+                  <input type="text" name="location" id="locationInput" class="form-control" 
+                         placeholder="e.g. 5th Main, 8th Cross, Indiranagar, Ward 24" 
+                         value="{{ location if location else '' }}" required>
+                </div>
+                <div class="form-text">Type address or click on the map below to auto-populate.</div>
+              </div>
+
+              <!-- Map Pinpoint Controls -->
+              <div class="mb-2 d-flex justify-content-between align-items-center">
+                <span class="small fw-semibold text-secondary">
+                  <i class="bi bi-pin-map-fill text-primary me-1"></i>Pinpoint Exact Coordinates
+                </span>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnLocateGPS">
+                  <i class="bi bi-crosshair me-1"></i>Use GPS Location
+                </button>
+              </div>
+
+              <!-- Interactive Leaflet Map -->
+              <div id="reportMap" class="map-container mb-2"></div>
+              
+              <div class="d-flex justify-content-between align-items-center small text-muted px-1">
+                <span id="coordsDisplay"><i class="bi bi-info-circle me-1"></i>Drag pin or click map to locate.</span>
+                <span>OpenStreetMap & Leaflet</span>
+              </div>
+
+              <!-- Hidden Latitude & Longitude Inputs -->
+              <input type="hidden" name="latitude" id="latitude" value="12.971600">
+              <input type="hidden" name="longitude" id="longitude" value="77.594600">
+
+              <!-- Submission Callout Box -->
+              <div class="p-3 bg-light rounded-3 mt-4 border">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <i class="bi bi-shield-check text-success fs-5"></i>
+                  <strong class="small text-dark">Official Municipal Redressal</strong>
+                </div>
+                <p class="small text-secondary mb-0">
+                  By clicking Submit, your issue will be recorded with a verifiable unique Tracking ID and dispatched to the designated engineering team.
+                </p>
+              </div>
+
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <!-- Submit Buttons -->
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-light border px-4">Cancel</a>
+            <button type="submit" class="btn btn-brand btn-lg px-5">
+              <i class="bi bi-send-fill me-2"></i>Submit Complaint
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Initialize map with default center (e.g. Bangalore center, or adjust as needed)
+    initReportMap(12.9716, 77.5946);
+  });
+</script>
+{% endblock %}
